@@ -72,3 +72,4 @@ class SqlBuilder:
             tables_used=result.get("tables_used", []),
             assumptions=result.get("assumptions", []),
         )
+        

@@ -89,12 +89,15 @@ def ask(request: AskRequest) -> AskResponse:
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"SQL execution failed: {exc}") from exc
 
-    return AskResponse(
+    resp = AskResponse(
         requirement=request.requirement,
         builder=builder_result,
         validation=validation,
         result=result,
     )
+    # logger.info(f"AskResponse: {resp}")
+
+    return resp
 
 
 @app.post("/test", response_model=str)
