@@ -1,0 +1,5 @@
+1. Give me the name and id of top 2 product purchased, along withe count of same. Please consider order status as well, if order was not cancelled, then only count.
+
+2. Give me the details of top 5 salesperson, who has got most of the orders.
+
+3. Give me the details of top 5 salesperson, who has got least of the orders.
