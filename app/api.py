@@ -78,25 +78,35 @@ def ask(request: AskRequest) -> AskResponse:
     try:
         builder_result = get_builder().build(request.requirement)
     except Exception as exc:
+        logger.error(f"SQL builder failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"SQL builder failed: {exc}") from exc
 
-    validation = get_validator().validate(builder_result.sql)
-    if not validation.is_valid or not request.execute:
-        return AskResponse(requirement=request.requirement, builder=builder_result, validation=validation)
+    validation_result = get_validator().validate(builder_result.sql)
+    if not validation_result.is_valid or not request.execute:
+        return AskResponse(
+                requirement = request.requirement, 
+                query = validation_result.sanitized_sql or builder_result.sql,
+                explanation = builder_result.explanation,
+                tables_used = builder_result.tables_used,
+                assumptions = builder_result.assumptions,
+            )
 
     try:
-        result = get_executor().execute(validation.sanitized_sql or builder_result.sql)
+        result = get_executor().execute(validation_result.sanitized_sql or builder_result.sql)
     except Exception as exc:
+        logger.error(f"SQL execution failed: {exc}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"SQL execution failed: {exc}") from exc
 
     resp = AskResponse(
         requirement=request.requirement,
-        builder=builder_result,
-        validation=validation,
+        query=validation_result.sanitized_sql or builder_result.sql,
+        explanation=builder_result.explanation,
+        tables_used=builder_result.tables_used,
+        assumptions=builder_result.assumptions,
         result=result,
     )
     # logger.info(f"AskResponse: {resp}")
-
+    logger.info(f"AskResponse: {resp}")
     return resp
 
 

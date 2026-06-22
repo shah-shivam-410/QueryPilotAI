@@ -11,16 +11,11 @@ from app.config import Settings
 from app.models import BuilderResult
 from app.schema_loader import SchemaCatalog
 
-
 SYSTEM_PROMPT = """You are a PostgreSQL SQL builder for a read-only analytics agent.
-Generate exactly one SELECT query for the user's requirement.
-Use only the provided schema context.
-Use fully-qualified table names.
-Do not use blocked tables or sensitive columns.
-Do not generate INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE, COPY, CALL, or DO.
-Prefer simple, auditable SQL over clever SQL.
+You will be given a SQL query with errors. Your task is to revise the SQL to fix the errors while keeping it as close to the original as possible.
+Only make changes necessary to fix the errors. Do not change the intent of the query.
 Return valid JSON with these keys: sql, explanation, tables_used, assumptions.
-"""
+"""        
 
 USER_PROMPT_TEMPLATE = """Allowed schemas: {schemas}
 Blocked tables: {blocked_tables}
@@ -34,7 +29,9 @@ User requirement:
 {requirement}
 """
 
-class SqlBuilder:
+
+
+class SqlRevisor:
     def __init__(self, settings: Settings, catalog: SchemaCatalog) -> None:
         self.settings = settings
         self.catalog = catalog
@@ -44,7 +41,7 @@ class SqlBuilder:
             temperature=0,
         ) if self.settings.gemini_api_key else None
 
-    def build(self, requirement: str) -> BuilderResult:
+    def revise(self, requirement: str) -> BuilderResult:
         if self.client is None:
             raise RuntimeError("GEMINI_API_KEY is not configured in .env")
         
@@ -69,5 +66,3 @@ class SqlBuilder:
         })
 
         return result
-        
- 

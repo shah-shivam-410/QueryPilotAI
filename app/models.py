@@ -14,7 +14,6 @@ class BuilderResult(BaseModel):
     tables_used: list[str] = Field(default_factory=list)
     assumptions: list[str] = Field(default_factory=list)
 
-
 class ValidationRequest(BaseModel):
     sql: str = Field(min_length=1)
 
@@ -35,6 +34,8 @@ class QueryResult(BaseModel):
 
 class AskResponse(BaseModel):
     requirement: str
-    builder: BuilderResult | None = None
-    validation: ValidationResult
+    query: str | None = None
+    explanation: str | None = None
+    tables_used: list[str] = Field(default_factory=list)
+    assumptions: list[str] = Field(default_factory=list)
     result: QueryResult | None = None
